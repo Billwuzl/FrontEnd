@@ -106,6 +106,16 @@ function MyApp({ Component, pageProps }) {
                   <p className={linkTextStyle}>Explore Profiles</p>
                 </a>
               </Link>
+              <Link href='/outsourced'>
+                <a>
+                  <p className={linkTextStyle}>Out-Sourced Jobs</p>
+                </a>
+              </Link>
+              <Link href='/hired'>
+                <a>
+                  <p className={linkTextStyle}>Hired For</p>
+                </a>
+              </Link>
               {
                 userProfile && (
                   <Link href={`/profile/${userProfile.id}`}>
