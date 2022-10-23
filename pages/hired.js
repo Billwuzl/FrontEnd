@@ -13,7 +13,7 @@ function HomePage(props) {
     console.log(contractAddress)
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner(0)
-    console.log(signer)
+    console.log(await signer.getAddress())
     const contract = new ethers.Contract(contractAddress, abi.abi, signer)
     const outSourced = await contract.currentContract(false);
     

@@ -1,4 +1,5 @@
-import { useContext, useRef } from 'react'
+import { useContext, useRef} from 'react'
+import { useRouter } from 'next/router';
 import { css } from '@emotion/css'
 import { ethers } from 'ethers'
 import { getSigner, baseMetadata } from '../utils'
@@ -8,7 +9,9 @@ import LENSHUB from '../abi/lenshub'
 import { create } from 'ipfs-http-client'
 import { v4 as uuid } from 'uuid'
 const client = create('https://ipfs.infura.io:5001/api/v0')
+const fs = require('fs');
 
+export var newPostCommited = false;
 export default function CreatePostModal({
   setIsModalOpen
 }) {
@@ -18,40 +21,50 @@ export default function CreatePostModal({
     const metaData = {
       content: inputRef.current.innerHTML,
       description: inputRef.current.innerHTML,
-      name: `Post by @${profile.handle}`,
-      external_url: `https://lenster.xyz/u/${profile.handle}`,
+      name: `Post by @employer`,
+      external_url: `https://lenster.xyz/u/employer`,
       metadata_id: uuid(),
       createdOn: new Date().toISOString(),
       ...baseMetadata
     }
-    const added = await client.add(JSON.stringify(metaData))
-    const uri = `https://ipfs.infura.io/ipfs/${added.path}`
-    return uri
+    // const added = await client.add(JSON.stringify(metaData))
+    // const uri = `https://ipfs.infura.io/ipfs/${added.path}`
+    return metaData
   }
+  const router = useRouter()
   async function savePost() {
     const contentURI = await uploadToIPFS()
-
-    const contract = new ethers.Contract(
-      LENS_HUB_CONTRACT_ADDRESS,
-      LENSHUB,
-      getSigner()
-    )
-    try {
-      const postData = {
-        profileId: profile.id,
-        contentURI,
-        collectModule: '0x23b9467334bEb345aAa6fd1545538F3d54436e96',
-        collectModuleInitData: ethers.utils.defaultAbiCoder.encode(['bool'], [true]),
-        referenceModule: '0x0000000000000000000000000000000000000000',
-        referenceModuleInitData: []
-      }
-      const tx = await contract.post(postData)
-      await tx.wait()
-      setIsModalOpen(false)
+    
+    // const contract = new ethers.Contract(
+    //   LENS_HUB_CONTRACT_ADDRESS,
+    //   LENSHUB,
+    //   getSigner()
+    // )
+    // try {
+    //   const postData = {
+    //     profileId: profile.id,
+    //     contentURI,
+    //     collectModule: '0x23b9467334bEb345aAa6fd1545538F3d54436e96',
+    //     collectModuleInitData: ethers.utils.defaultAbiCoder.encode(['bool'], [true]),
+    //     referenceModule: '0x0000000000000000000000000000000000000000',
+    //     referenceModuleInitData: []
+    //   }
+    //   const tx = await contract.post(postData)
+    //   await tx.wait()
+    //   setIsModalOpen(false)
       
-    } catch (err) {
-      console.log('error: ', err)
-    }
+    // } catch (err) {
+    //   console.log('error: ', err)
+    // }
+    // fs.writeFile('/hardcode.txt', 'posted', err => {
+    //   if (err) {
+    //     console.error(err);
+    //   }
+    //   // file written successfully
+    // });
+    setIsModalOpen(false)
+    newPostCommited = true
+    router.push('/')
   }
   return (
     <div className={containerStyle}>

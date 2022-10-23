@@ -6,6 +6,8 @@ import { trimString, generateRandomColor } from '../utils'
 import { Button, SearchInput, Placeholders } from '../components'
 import { AppContext } from '../context'
 import Link from 'next/link'
+import { newPostCommited } from '../components/CreatePostModal'
+const fs = require('fs')
 
 const typeMap = {
   Comment: "Comment",
@@ -17,6 +19,7 @@ export default function Home() {
   const [posts, setPosts] = useState([])
   const [loadingState, setLoadingState] = useState('loading')
   const [searchString, setSearchString] = useState('')
+  const [comment, setComment] = useState(false)
   const { profile } = useContext(AppContext)
 
   useEffect(() => {
@@ -35,18 +38,20 @@ export default function Home() {
         const response = await client.query(timeline, {
           profileId: profile.id, limit: 15
         }).toPromise()
-        const posts = response.data.timeline.items.filter(post => {
+        let posts = response.data.timeline.items.filter(post => {
           if (post.profile) {
             post.backgroundColor = generateRandomColor()
             return post
           }
         })
         setPosts(posts)
+
+      
         setLoadingState('loaded')
       } catch (error) {
         console.log({ error })
       }
-    } else if (!addresses.length) {
+    } else{
       try {
         const response = await basicClient.query(explorePublications).toPromise()
         const posts = response.data.explorePublications.items.filter(post => {
@@ -56,6 +61,13 @@ export default function Home() {
           }
         })
         setPosts(posts)
+        
+        // let post = posts[0]
+        // post.metadata.name = 'Posted by @employer.lens'
+        // post.metadata.description = 'job'
+        // post.profile.name = 'employer'
+        // console.log(post)
+        // posts.unshift(post)
         setLoadingState('loaded')
       } catch (error) {
         console.log({ error })
@@ -86,6 +98,10 @@ export default function Home() {
     }
   }
 
+  function Comment(){
+    setComment(true)
+  }
+
   function handleKeyDown(e) {
     if (e.key === 'Enter') {
       searchForPost()
@@ -93,6 +109,8 @@ export default function Home() {
   }
 
   return (
+    console.log(newPostCommited),
+
     <div>
       <div className={searchContainerStyle}>
         <SearchInput
@@ -106,6 +124,7 @@ export default function Home() {
           onClick={searchForPost}
         />
       </div>
+
       <div className={listItemContainerStyle}>
         {
           loadingState === 'no-results' && (
@@ -115,8 +134,57 @@ export default function Home() {
         {
            loadingState === 'loading' && <Placeholders number={6} />
         }
+
+        {
+        (newPostCommited && 
+          <div>
+          <Link href={`/profile/0x123456`} >
+              <a>
+                <div className={listItemStyle}>
+                  {/* <p className={itemTypeStyle}>{typeMap[posts[0].__typename]}</p> */}
+                  <div className={profileContainerStyle} >
+                    {
+                      true ? (
+                      <img src='http' className={profileImageStyle} />
+                      ) : (
+                        <div
+                          className={
+                            css`
+                            ${placeholderStyle};
+                            `
+                          }
+                        />
+                      )
+                    }
+                    
+                    <div className={profileInfoStyle}>
+                      <h3 className={nameStyle}>employer</h3>
+                      <p className={handleStyle}>employer.lens</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className={latestPostStyle}>job</p>
+                  </div>
+                  {
+                    (comment &&  <p href = '/profile/0x123456'>employee: interested</p>)
+                  }
+
+                </div>
+              </a>
+            </Link>
+            <div >
+
+                    <label htmlFor='address'>Comment</label>
+                    <input type='text' id="Comment" name="Comment" placeholder="interested?"/>
+                    <button onClick={Comment}></button>
+
+            </div>
+            </div>
+        )
+        }
         {
           posts.map((post, index) => (
+            <div>
             <Link href={`/profile/${post.profile.id || post.profile.profileId}`} key={index}>
               <a>
                 <div className={listItemStyle}>
@@ -145,9 +213,16 @@ export default function Home() {
                   <div>
                     <p className={latestPostStyle}>{trimString(post.metadata.content, 200)}</p>
                   </div>
+                  
                 </div>
               </a>
             </Link>
+            <div >
+                    <label htmlFor='address'>Comment</label>
+                    <input type='text'/>
+                    <button></button>
+                  </div>
+            </div>
           ))
         }
       </div>

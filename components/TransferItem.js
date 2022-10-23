@@ -1,4 +1,5 @@
-import { useRouter } from 'next/router';
+import { useRouter} from 'next/router';
+import {useEffect, useState } from 'react'
 import Card from './Card';
 import classes from './TransferItem.module.css';
 import address from '../abi/address.json';
@@ -8,6 +9,21 @@ const ethers = require('ethers');
 
 function TransferItem(props) {
   const router = useRouter();
+
+  const [user, setUser] = useState()
+
+  useEffect(() => {
+    const fetchData = async () => {
+      
+      const provider = new ethers.providers.Web3Provider(window.ethereum)
+
+      const signer = provider.getSigner(0)
+      setUser(await signer.getAddress())
+    }
+    fetchData()
+
+    
+  })
  
   async function accept(){
     const contractAddress = address.address
@@ -16,7 +32,7 @@ function TransferItem(props) {
     const signer = provider.getSigner(0)
 
     const contract = new ethers.Contract(contractAddress, abi.abi, signer)
-    await contract.acceptOffer(props.description.ID, {value: ethers.utils.parseEther(`${props.description.salary*0.1}`)});
+    await contract.acceptOffer(0, {value: ethers.utils.parseEther('0.001')});
   }
   async function approve(){
     const contractAddress = address.address
@@ -41,7 +57,7 @@ function TransferItem(props) {
             <h3>{props.description.employee}</h3>
           </div>
           <div className={classes.content}>
-            <h3>{props.description.salary}</h3>
+            <h3>0.01</h3>
           </div>
           <div className={classes.content}>
             <h3>Completed</h3>
@@ -51,7 +67,7 @@ function TransferItem(props) {
     )
   }
   else if(props.description.status == 1){
-    if(props.description.employer == signer.getAddress()){
+    if(props.description.employer == user){
       return (
         <li className={classes.item}>
           <Card>
@@ -62,7 +78,7 @@ function TransferItem(props) {
               <h3>{props.description.employee}</h3>
             </div>
             <div className={classes.content}>
-              <h3>{props.description.salary}</h3>
+              <h3>0.01</h3>
             </div>
             <div className={classes.content}>
               <h3>In Progress</h3>
@@ -85,7 +101,7 @@ function TransferItem(props) {
               <h3>{props.description.employee}</h3>
             </div>
             <div className={classes.content}>
-              <h3>{props.description.salary}</h3>
+              <h3>0.01</h3>
             </div>
             <div className={classes.content}>
               <h3>In Progress</h3>
@@ -96,7 +112,8 @@ function TransferItem(props) {
     }
   }
   else{
-    if(props.description.employer == signer.getAddress()){
+    console.log(user)
+    if(props.description.employer == user){
       return (
         <li className={classes.item}>
           <Card>
@@ -107,7 +124,7 @@ function TransferItem(props) {
               <h3>{props.description.employee}</h3>
             </div>
             <div className={classes.content}>
-              <h3>{props.description.salary}</h3>
+              <h3>0.01</h3>
             </div>
             <div className={classes.content}>
               <h3>Waiting for Reply</h3>
@@ -127,7 +144,7 @@ function TransferItem(props) {
               <h3>{props.description.employee}</h3>
             </div>
             <div className={classes.content}>
-              <h3>{props.description.salary}</h3>
+              <h3>0.01</h3>
             </div>
             <div className={classes.content}>
               <h3>Offered</h3>
